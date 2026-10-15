@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="CardEdge"><meta name="theme-color" content="#0a0a0a"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.png">
+<title>CardEdge TCG</title>
+<style>
+:root{--bg:#fff;--card:#fff;--ink:#0a0a0a;--mut:#4d4d4d;--line:#0a0a0a;--acc:#d4af37;--gt:#7a5c00;--accink:#0a0a0a;--pos:#0a7a3d;--neg:#c0262d;--warn:#8a5a00;--soft:#f4efdd;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--card:#141414;--ink:#f5f5f5;--mut:#b8b8b8;--line:#d4af37;--acc:#d4af37;--gt:#e6c75a;--accink:#0a0a0a;--pos:#4fd68a;--neg:#ff7a80;--warn:#ffc04d;--soft:#2a2512;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--card:#141414;--ink:#f5f5f5;--mut:#b8b8b8;--line:#d4af37;--acc:#d4af37;--gt:#e6c75a;--accink:#0a0a0a;--pos:#4fd68a;--neg:#ff7a80;--warn:#ffc04d;--soft:#2a2512;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 "Avenir Next",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#0a0a0a;z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:#0a0a0a;color:#fff;border-bottom:3px solid #d4af37;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline}
+header b{font-size:22px;letter-spacing:-.02em;color:#d4af37}header span{font-size:14px;opacity:.8}
+main{padding:14px 14px 110px;max-width:640px;margin:0 auto}
+h2{font-size:22px;margin:4px 0 12px;letter-spacing:-.01em}h3{font-size:17px;margin:0 0 8px}
+.c{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mut);margin:0 0 4px}
+input,select,textarea{width:100%;min-height:48px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:120px;font:14px/1.3 ui-monospace,Menlo,monospace}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.f{margin-bottom:10px}
+button,.btn{min-height:48px;padding:10px 16px;border-radius:10px;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+button.p{background:var(--acc);color:var(--accink);border-color:var(--acc)}button.d{border-color:var(--neg);color:var(--neg)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.row>*{flex:1 1 auto}
+.chip{min-width:64px}.chip.on{background:var(--ink);color:var(--bg)}
+.big{font-size:30px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.k{font-size:13px;color:var(--mut);font-weight:600}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}.mut{color:var(--mut);font-size:14px}
+.item{border-top:1.5px solid var(--line);padding:10px 0;cursor:pointer}.item:first-child{border-top:0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);margin-right:4px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-variant-numeric:tabular-nums}
+.conf{display:inline-block;font-weight:800;padding:4px 12px;border-radius:99px;border:2px solid currentColor}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--card);border-top:1.5px solid var(--line);display:grid;grid-template-columns:repeat(7,1fr);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+nav button{border:0;background:none;min-height:54px;font-size:12px;padding:4px 0;flex-direction:column;gap:2px;color:var(--mut)}
+nav button i{font-style:normal;font-size:20px}nav button.on{color:var(--ink);box-shadow:inset 0 3px 0 #d4af37}nav button.on i{color:var(--gt)}
+#modal{position:fixed;inset:0;background:rgba(5,8,20,.6);z-index:20;display:none;overflow:auto;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 30px}
+#modal .c{max-width:620px;margin:0 auto}
+#toast{position:fixed;left:12px;right:12px;bottom:90px;z-index:30;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;display:none;font-weight:600}
+.thumb{width:48px;height:67px;object-fit:cover;border-radius:5px;border:1px solid var(--line);background:var(--soft);flex:none}.sr{display:flex;gap:12px;align-items:center}.big-img{width:100%;max-width:340px;display:block;margin:0 auto 10px;border-radius:12px;background:var(--soft);min-height:200px}
+@keyframes sh{to{background-position:-200% 0}}.sk{background:linear-gradient(90deg,var(--soft) 25%,var(--line) 50%,var(--soft) 75%);background-size:200% 100%;animation:sh 1.3s linear infinite;border-radius:8px}@media(prefers-reduced-motion:reduce){.sk{animation:none}}
+#toast button{margin-left:12px;min-height:36px;padding:2px 14px;background:#d4af37;color:#0a0a0a;border-color:#d4af37}.bk{background:var(--soft);border-color:#d4af37}
+#seller{display:none;position:fixed;inset:0;z-index:40;background:#000;color:#fff;text-align:center;padding:calc(36px + env(safe-area-inset-top,0px)) 20px calc(36px + env(safe-area-inset-bottom,0px));overflow:auto}
+.lotrow{transition:transform .15s}
+a{color:var(--gt)}.chk{display:flex;gap:10px;align-items:center;min-height:44px}.chk input{width:26px;min-height:26px;flex:none}
+</style></head><body>
+<header><b>CardEdge</b><span id="net">315TCG</span></header>
+<main id="main"></main><nav id="nav"></nav><div id="modal"></div><div id="toast" role="status"></div><div id="seller" data-a="sellclose"></div><datalist id="setlist"></datalist>
+<script>
+const K='cardedge_tcg_v1',$=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(String(v??'').replace(/[$,%\s]/g,''));return isFinite(n)?n:NaN};
+const n0=v=>isFinite(num(v))?num(v):0;
+const money=n=>isFinite(n)?(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+const sgn=n=>`<span class="${n>=0?'pos':'neg'}">${money(n)}</span>`;
+const today=()=>new Date().toISOString().slice(0,10);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+let S={inv:[],tx:[]};
+try{const r=JSON.parse(localStorage.getItem(K)||'null');if(r&&Array.isArray(r.inv))S={inv:r.inv,tx:r.tx||[]}}catch(e){}
+let META={changes:0,last:0},PERSISTED=null,UNDO=null;try{Object.assign(META,JSON.parse(localStorage.getItem('cardedge_meta_v1')||'{}'))}catch(e){}
+const saveMeta=()=>{try{localStorage.setItem('cardedge_meta_v1',JSON.stringify(META))}catch(e){}};
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){toast('Could not save in this browser. Copy a backup from the Data tab.')}META.changes++;saveMeta()}
+function toast(m,undo){const t=$('#toast');UNDO=undo||null;t.innerHTML=esc(m)+(undo?'<button data-a="undo">Undo</button>':'');t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',undo?8000:3500)}
+const copyText=t=>{try{navigator.clipboard.writeText(t).catch(()=>{})}catch(e){}const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
+const median=a=>{if(!a.length)return NaN;a=[...a].sort((x,y)=>x-y);const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2};
+const P={mode:'buy',buy:{name:'',mv:'',pct:'70',adj:''},sell:{name:'',price:'',cost:'',prof:'ebay',fee:'13.25',fix:'0.30',ship:'',sup:'',margin:'20'},
+pr:{type:'raw',name:'',set:'',num:'',co:'PSA',grade:'10',tcg:'',pc:'',guide:'',comps:[],bin:[]},
+trade:{give:[],get:[],pg:'100',pt:'80',chk:[0,0,0,0,0]},inv:{q:'',f:'all',s:'recent'},arm:'',data:''};
+const gp=p=>p.split('.').reduce((o,k)=>o[k],P);
+const sp=(p,v)=>{const a=p.split('.'),l=a.pop();a.reduce((o,k)=>o[k],P)[l]=v};
+const SETS=[['Mega Evolution','Mega Evolution'],['Phantasmal Flames','Mega Evolution'],['Ascended Heroes','Mega Evolution'],['Perfect Order','Mega Evolution'],['Chaos Rising','Mega Evolution'],['White Flare','Scarlet & Violet',173],['Black Bolt','Scarlet & Violet',172],['Destined Rivals','Scarlet & Violet',244],['Journey Together','Scarlet & Violet',190],['Prismatic Evolutions','Scarlet & Violet',180],['Surging Sparks','Scarlet & Violet',252],['Stellar Crown','Scarlet & Violet',175],['Shrouded Fable','Scarlet & Violet',99],['Twilight Masquerade','Scarlet & Violet',226],['Temporal Forces','Scarlet & Violet',218],['Paldean Fates','Scarlet & Violet',245],['Paradox Rift','Scarlet & Violet',266],['151','Scarlet & Violet',207],['Obsidian Flames','Scarlet & Violet',230],['Paldea Evolved','Scarlet & Violet',279],['Scarlet & Violet','Scarlet & Violet',258],['Crown Zenith','Sword & Shield',160],['Silver Tempest','Sword & Shield',215],['Lost Origin','Sword & Shield',217],['Pokémon GO','Sword & Shield',88],['Astral Radiance','Sword & Shield',216],['Brilliant Stars','Sword & Shield',186],['Fusion Strike','Sword & Shield',284],['Celebrations','Sword & Shield',25],['Evolving Skies','Sword & Shield',237],['Chilling Reign','Sword & Shield',233],['Battle Styles','Sword & Shield',183],['Shining Fates','Sword & Shield',73],['Vivid Voltage','Sword & Shield',203]];
+$('#setlist').innerHTML=SETS.map(s=>`<option value="${esc(s[0])}">${esc(s[1])}${s[2]?' · '+s[2]+' total':''}</option>`).join('');
+const setInfo=n=>{const s=SETS.find(x=>x[0].toLowerCase()===String(n).trim().toLowerCase());return s?'Set found: '+s[1]+(s[2]?', '+s[2]+' cards including secret rares (the printed number is smaller)':''):''};
+const FEES={ebay:['eBay (default 13.25% + $0.30)',13.25,.3],tcg:['TCGplayer (default 12.75% + $0.30)',12.75,.3],cash:['Card show, cash (0%)',0,0],card:['Card show, card reader (default 2.6% + $0.10)',2.6,.1],custom:['Custom',null,null]};
+const inp=(path,label,o={})=>`<div class="f"><label>${label}</label><input data-s="${path}" value="${esc(gp(path))}" ${o.t?`type="${o.t}"`:`inputmode="${o.m||'decimal'}"`} placeholder="${o.ph||''}" ${o.list?'list="setlist"':''} autocomplete="off"></div>`;
+const sel=(path,label,opts)=>`<div class="f"><label>${label}</label><select data-s="${path}">${opts.map(o=>`<option ${gp(path)==o?'selected':''}>${o}</option>`).join('')}</select></div>`;
+const kv=(k,v,b)=>`<div class="kv"><span>${k}</span><span ${b?'style="font-weight:800"':''}>${v}</span></div>`;
+
+/* ---------- views ---------- */
+const V={};
+V.dash=()=>{let val=0,cost=0,q=0,miss=0,mc=0;S.inv.forEach(i=>{const n=n0(i.qty)||1;q+=n;cost+=n*n0(i.cost);if(num(i.market)>0){val+=n*num(i.market);mc+=n*n0(i.cost)}else miss++});
+const real=S.tx.filter(t=>t.type==='sell').reduce((a,t)=>a+n0(t.profit),0);
+return `<h2>Overview</h2><div class="c"><div class="k">Collection value (your entered market values)</div><div class="big">${money(val)}</div>
+${kv('Cost basis (all cards)',money(cost))}${kv('Unrealized P/L (priced cards)',sgn(val-mc))}${kv('Realized profit (logged sales)',sgn(real))}${kv('Cards / entries',q+' / '+S.inv.length)}
+${miss?`<p class="mut">${miss} entr${miss>1?'ies have':'y has'} no market value and ${miss>1?'are':'is'} left out of value and P/L.</p>`:''}</div>
+<div class="row"><button class="p" data-a="tab" data-v="price">Price a card</button><button data-a="tab" data-v="vendor">Offer calculator</button></div>
+<div class="c"><h3>Recent activity</h3>${S.tx.length?S.tx.slice(-6).reverse().map(t=>`<div class="item" style="cursor:default"><b>${esc(t.type==='trade'?'Trade':t.type==='buy'?'Purchase':'Sale')}</b> ${esc(t.name||'')} <span class="mut">${esc(t.date)}</span><br><span class="mut">${esc(t.note||'')}</span></div>`).join(''):'<p class="mut">No transactions yet. Log purchases, sales and trades from the Offer and Trade tabs.</p>'}</div>
+<p class="mut">Values here come from what you enter or save from a catalog price. Estimates are not guaranteed sale prices. Data is stored in this browser only: back it up from the Data tab.</p>`};
+
+V.inv=()=>V.dash()+`<h2>Inventory</h2><div class="c"><div class="f"><label>Search</label><input data-s="inv.q" data-live="inv" value="${esc(P.inv.q)}" placeholder="Name, set, number, location" type="search"></div>
+<div class="g2"><div class="f"><label>Show</label><select data-s="inv.f" data-live="inv"><option value="all">All</option><option value="raw">Raw</option><option value="graded">Graded</option></select></div>
+<div class="f"><label>Sort</label><select data-s="inv.s" data-live="inv"><option value="recent">Newest</option><option value="name">Name</option><option value="value">Value</option><option value="profit">Profit</option></select></div></div>
+<div class="f"><label>Condition</label><select data-s="inv.c" data-live="inv"><option value="all">All conditions</option>${Object.keys(COND).map(c=>`<option value="${c}">${c} ${CN[c]}</option>`).join('')}</select></div><button class="p" style="width:100%" data-a="add">Add card</button></div><div class="c" id="list"></div>`;
+function updInv(){const q=P.inv.q.toLowerCase();let L=S.inv.filter(i=>(P.inv.f==='all'||(P.inv.f==='graded')==!!i.co&&i.co!=='')&&(!P.inv.c||P.inv.c==='all'||(!i.co&&i.cond===P.inv.c))&&(!q||[i.name,i.set,i.number,i.loc,i.variant,i.notes].join(' ').toLowerCase().includes(q)));
+const pf=i=>(n0(i.qty)||1)*(n0(i.market)-n0(i.cost));
+if(P.inv.s==='name')L.sort((a,b)=>a.name.localeCompare(b.name));else if(P.inv.s==='value')L.sort((a,b)=>n0(b.market)*(n0(b.qty)||1)-n0(a.market)*(n0(a.qty)||1));else if(P.inv.s==='profit')L.sort((a,b)=>pf(b)-pf(a));else L=[...L].reverse();
+const el=$('#list');if(!el)return;
+el.innerHTML=L.length?L.map(i=>`<div class="item sr" data-a="edit" data-v="${i.id}">${i.img?`<img class="thumb" loading="lazy" alt="" src="${esc(i.img)}">`:''}<div style="min-width:0"><b>${esc(i.name)}</b> ${n0(i.qty)>1?`<span class="tag">×${esc(i.qty)}</span>`:''}${i.co?`<span class="tag">${esc(i.co)} ${esc(i.grade)}</span>`:`<span class="tag">${esc(i.cond||'Raw')}</span>`}<br>
+<span class="mut">${esc([i.set,i.number,i.lang,i.variant,i.loc].filter(Boolean).join(' · '))}</span><br>
+<span class="mut">Cost ${money(n0(i.cost))} · Market ${num(i.market)>0?money(num(i.market)):'not set'}${num(i.ask)>0?' · Ask '+money(num(i.ask)):''}</span>${num(i.market)>0?` · ${sgn(pf(i))}`:''}</div></div>`).join(''):
+`<p class="mut">${S.inv.length?'No cards match this search or filter.':'Your inventory is empty. Tap Add card, or import a CSV from the Data tab.'}</p>`}
+
+const FL=[['name','Card name','text'],['set','Set','text'],['number','Collector number (e.g. 161/131)','text'],['lang','Language','text'],['variant','Variant (holo, reverse, SIR...)','text'],['co','Grading company','s',['','PSA','BGS','CGC','Other']],['grade','Grade','text'],['cert','Cert number','text'],['cond','Raw condition','s',['NM','LP','MP','HP','DMG']],['qty','Quantity','n'],['cost','Cost per copy ($)','n'],['date','Acquired','date'],['market','Market value per copy ($)','n'],['ask','Your asking price ($)','n'],['loc','Storage location','text'],['notes','Notes','text']];
+function form(it){it=it||{};const id=it.id||'';FX={img:it.img||'',cid:it.cid||''};$('#modal').innerHTML=`<div class="c"><h2>${id?'Edit card':'Add card'}</h2>${FL.map(([k,l,t,o])=>{const v=it[k]??(k==='qty'?'1':k==='lang'?'English':k==='cond'?'NM':k==='date'?today():'');
+return `<div class="f"><label>${l}</label>${t==='s'?`<select id="f_${k}">${o.map(x=>`<option ${v==x?'selected':''} value="${x}">${x||'None (raw)'}</option>`).join('')}</select>`:`<input id="f_${k}" value="${esc(v)}" ${k==='set'?'list="setlist"':''} ${t==='n'?'inputmode="decimal"':t==='date'?'type="date"':''}>`}</div>`}).join('')}
+<div class="row"><button class="p" data-a="saveitem" data-v="${id}">Save card</button><button data-a="close">Cancel</button></div>${id?`<button class="d" style="width:100%" data-a="delitem" data-v="${id}">${P.arm===id?'Tap again to delete':'Delete card'}</button>`:''}</div>`;$('#modal').style.display='block';$('#modal').scrollTop=0}
+
+/* pricing lab */
+function priceCalc(){const p=P.pr,inc=p.comps.filter(c=>!c.ex&&c.price>0),med=median(inc.map(c=>c.price)),src=[];
+if(p.type==='raw'){if(inc.length)src.push(['eBay sold median',med,.6]);const pk=COND[p.cond||'NM']||1,sf=pk<1?' (NM × '+Math.round(pk*100)+'% for '+(p.cond)+')':'';if(num(p.tcg)>0)src.push(['TCGplayer Market'+sf,num(p.tcg)*pk,.25]);if(num(p.pc)>0)src.push(['PriceCharting'+sf,num(p.pc)*pk,.15])}
+else{if(inc.length)src.push(['eBay graded sold median',med,.7]);if(num(p.guide)>0)src.push(['Grade-specific guide',num(p.guide),.3])}
+if(!src.length)return{src,none:true};
+const W=src.reduce((a,s)=>a+s[2],0),est=src.reduce((a,s)=>a+s[1]*s[2],0)/W,vs=src.map(s=>s[1]),ratio=Math.max(...vs)/Math.min(...vs);
+const dated=inc.filter(c=>c.date).map(c=>(Date.now()-new Date(c.date))/864e5),why=[];let sc=0;
+if(inc.length>=5){sc+=2;why.push(inc.length+' included sold comps')}else if(inc.length>=3){sc+=1;why.push(inc.length+' included sold comps')}else why.push('only '+inc.length+' included sold comp'+(inc.length==1?'':'s'));
+if(dated.length&&median(dated)<=60){sc+=1;why.push('comps are recent (median '+Math.round(median(dated))+' days old)')}else why.push('comps are old or undated');
+if(src.length>1){sc+=1;if(ratio<=1.15){sc+=1;why.push('sources agree within 15%')}else if(ratio>=1.35){sc-=2;why.push('sources disagree by '+Math.round((ratio-1)*100)+'%')}else why.push('sources differ moderately')}else why.push('single source');
+let conf=sc>=4?'High':sc>=2?'Medium':'Low';if(src.length===1&&inc.length<3&&!(p.type==='raw'&&num(p.tcg)>0))conf='Insufficient data';
+const w=conf==='High'?.08:conf==='Medium'?.15:.25,wid=w+(inc.length<3?.1:0);
+return{src,W,est,conf,why,lo:Math.min(est*(1-wid),...vs),hi:Math.max(est*(1+wid),...vs),n:inc.length,wid}}
+V.price=()=>{const p=P.pr,g=p.type==='graded',q=encodeURIComponent([p.name,p.set,p.num,g?p.co+' '+p.grade:''].filter(Boolean).join(' '));
+return `<h2>Pricing Lab</h2><div class="c">${p.img?`<div class="sr" style="margin-bottom:10px"><img class="thumb" alt="" src="${esc(p.img)}"><div><b>${esc(p.name)}</b><br><span class="mut">${esc(p.set)} ${esc(p.num)}</span></div></div>`:''}<button style="width:100%;margin-bottom:10px" data-a="tab" data-v="search">Search card catalog</button><div class="row"><button class="chip ${!g?'on':''}" data-a="ptype" data-v="raw">Raw</button><button class="chip ${g?'on':''}" data-a="ptype" data-v="graded">Graded</button></div>${g?'':`<div class="k">Condition (guide prices are near mint and get scaled)</div><div class="row">${Object.keys(COND).map(c=>`<button class="chip ${(p.cond||'NM')===c?'on':''}" data-a="prcond" data-v="${c}">${c}</button>`).join('')}</div>`}
+${inp('pr.name','Card name',{t:'text'})}<div class="g2">${inp('pr.set','Set (start typing)',{t:'text',list:1})}${inp('pr.num','Number',{t:'text'})}</div>
+${g?`<div class="g2">${sel('pr.co','Company',['PSA','BGS','CGC','Other'])}${inp('pr.grade','Grade',{t:'text'})}</div>`:''}
+<p class="mut" id="setinfo"></p><p class="mut">Confirm exact card, set, number, language and variant before trusting any value.</p>
+<div class="row"><a class="btn" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1">eBay sold</a><a class="btn" target="_blank" rel="noopener" href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_BIN=1">eBay Buy It Now</a>
+${g?'':`<a class="btn" target="_blank" rel="noopener" href="https://www.tcgplayer.com/search/pokemon/product?q=${q}">TCGplayer</a>`}<a class="btn" target="_blank" rel="noopener" href="https://www.pricecharting.com/search-products?q=${q}&type=prices">PriceCharting</a><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${q}+pokemon+card">Card images</a></div></div>
+<div class="c"><h3>Quick comps</h3><p class="mut">1. Tap eBay sold above. 2. On eBay: Select All, Copy. 3. Paste below. Comps, exclusions and the estimate fill in automatically.</p><textarea id="pz" style="min-height:90px" placeholder="Paste eBay sold results here"></textarea><button class="p" style="width:100%;margin-top:8px" data-a="autocomp">Find comps</button><p class="mut" id="aimsg"></p></div>
+<div class="c"><h3>Guide values (type from the source page)</h3>${g?inp('pr.guide','Guide value for this exact grade ($)'):`<div class="g2">${inp('pr.tcg','TCGplayer Market ($)')}${inp('pr.pc','PriceCharting ($)')}</div>${p.tsrc?`<p class="mut">${esc(p.tsrc)}</p>`:''}`}</div>
+<div class="c"><h3>Sold comps</h3><div class="g2"><div class="f"><label>Sale price ($)</label><input id="cp" inputmode="decimal"></div><div class="f"><label>Sale date</label><input id="cd" type="date"></div></div>
+<div class="f"><label>Link (optional)</label><input id="cl" inputmode="url"></div><button class="p" style="width:100%" data-a="addcomp">Add sold comp</button><div id="comps"></div></div>
+<div class="c"><h3>Active Buy It Now (asking prices, not used in the estimate)</h3><div class="g2"><div class="f"><label>Asking price ($)</label><input id="bp" inputmode="decimal"></div><div class="f"><label>Link</label><input id="bl" inputmode="url"></div></div><button style="width:100%" data-a="addbin">Add listing</button><div id="bins"></div></div>
+<div class="c" id="out"></div>`}
+function updComps(){const p=P.pr,med=median(p.comps.filter(c=>!c.ex).map(c=>c.price)),el=$('#comps');if(!el)return;
+el.innerHTML=p.comps.map((c,i)=>{const out=!c.ex&&p.comps.filter(x=>!x.ex).length>=3&&Math.abs(c.price-med)/med>.4;return `<div class="item" style="cursor:default"><b>${money(c.price)}</b> <span class="mut">${esc(c.date||'no date')}</span> ${c.title?`<br><span class="mut">${esc(c.title)}</span><br>`:''}${c.link?`<a href="${esc(c.link)}" target="_blank" rel="noopener">source</a>`:''}${out?' <span class="warn">possible outlier</span>':''}
+<div class="row" style="margin:6px 0 0"><button data-a="excomp" data-v="${i}">${c.ex?'Include again':'Exclude'}</button><button class="d" data-a="delcomp" data-v="${i}">Remove</button></div>${c.ex?`<div class="f" style="margin-top:6px"><label>Why excluded</label><input data-s="pr.comps.${i}.reason" value="${esc(c.reason||'')}" placeholder="Wrong card, damaged, lot..."></div>`:''}</div>`}).join('')||'<p class="mut">No comps yet. Open the eBay sold search, then enter matching completed sales here.</p>';
+const b=p.bin.map(x=>x.price),bl=$('#bins');bl.innerHTML=p.bin.map((x,i)=>`<div class="item" style="cursor:default">${money(x.price)} ${x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">listing</a>`:''} <button class="d" data-a="delbin" data-v="${i}" style="min-height:36px;padding:2px 10px">Remove</button></div>`).join('')+(b.length?`<p class="mut">Lowest ask ${money(Math.min(...b))} · median ask ${money(median(b))}</p>`:'')}
+function updPrice(){updComps();const si=$('#setinfo');if(si)si.textContent=setInfo(P.pr.set);const r=priceCalc(),el=$('#out');if(!el)return;
+if(r.none){el.innerHTML='<h3>Estimate</h3><p class="mut">Add at least one sold comp or guide value. Nothing is estimated without your evidence.</p>';return}
+const cc=r.conf==='High'?'pos':r.conf==='Medium'?'warn':'neg';
+el.innerHTML=`<h3>Estimate (${P.pr.type})</h3><div class="big">${r.conf==='Insufficient data'?'—':money(r.est)}</div><span class="conf ${cc}">${r.conf}</span>
+${r.conf==='Insufficient data'?'<p class="mut">One source with fewer than 3 comps is not enough. Raw reference only: '+money(r.est)+'</p>':`<p>Likely range ${money(r.lo)} to ${money(r.hi)} <span class="mut">(provisional, not calibrated against past sales)</span></p>`}
+<h3>Calculation</h3>${r.src.map(s=>kv(esc(s[0])+' ('+Math.round(s[2]/r.W*100)+'%)',money(s[1]))).join('')}${kv('Weighted estimate',money(r.est),1)}
+<p class="mut">Base weights: ${P.pr.type==='raw'?'60% eBay sold / 25% TCGplayer / 15% PriceCharting':'70% eBay graded sold / 30% grade-specific guide'}. Missing sources are dropped and the rest renormalized.</p>
+<p class="mut">Why: ${r.why.join('; ')}.</p>${r.conf==='Insufficient data'?'':`<h3 style="margin-top:10px">Offers</h3>${offersHTML(r.est,r.lo)}<div class="row" style="margin-top:10px"><button class="p" data-a="saveest">Save to inventory</button><button data-a="tooffer" data-v="${r.est}">Offer calculator</button></div>`}`}
+
+/* vendor */
+V.vendor=()=>{const b=P.mode==='buy';return `<h2>Offer & profit</h2><div class="row"><button class="chip ${b?'on':''}" data-a="mode" data-v="buy">Buying</button><button class="chip ${!b?'on':''}" data-a="mode" data-v="sell">Selling</button></div>
+<div class="c">${b?`${lookupHTML()}<label>Tap your buy percentage</label><div class="row">${[60,70,80,85].map(x=>`<button class="chip ${P.buy.pct==x?'on':''}" data-a="pct" data-v="${x}">${x}%</button>`).join('')}</div><details style="margin-top:8px"><summary style="min-height:44px;font-weight:700;cursor:pointer">Manual value, custom % or adjustment</summary>${inp('buy.mv','Market value ($), filled automatically. Edit to override.')}${inp('buy.pct','Custom %')}${inp('buy.name','Card name (optional)',{t:'text'})}${inp('buy.adj','Adjustment ($, minus to lower the offer)',{m:'text'})}</details>`:
+`${lookupHTML()}<div class="f"><label>Or pick from your inventory</label><select data-ch="sellinv"><option value="">Choose a card</option>${S.inv.map(i=>`<option value="${i.id}" ${P.sell.invId==i.id?'selected':''}>${esc(i.name)} ${i.co?esc(i.co+' '+i.grade):esc(i.cond||'')} x${esc(i.qty||1)}</option>`).join('')}</select></div>${inp('sell.name','Card (optional)',{t:'text'})}${inp('sell.price','Expected sale price ($), filled from the lookup')}${inp('sell.cost','Cost basis ($)')}
+<div class="f"><label>Fee profile (editable defaults, verify current fees)</label><select data-ch="prof">${Object.entries(FEES).map(([k,v])=>`<option value="${k}" ${P.sell.prof==k?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+<div class="g2">${inp('sell.fee','Fee %')}${inp('sell.fix','Fixed fee ($)')}${inp('sell.ship','Shipping ($)')}${inp('sell.sup','Supplies ($)')}</div>${inp('sell.margin','Target margin %')}`}</div><div id="lot"></div><div class="c" id="out"></div>`};
+function updVendor(){const el=$('#out');if(!el)return;updSearch();updBsel();updLot()
+if(P.mode==='buy'){const mv=num(P.buy.mv),pc=n0(P.buy.pct),adj=n0(P.buy.adj);if(!(mv>0)){el.innerHTML='<p class="mut">Enter the estimated market value to see offers.</p>';return}
+const mx=mv*pc/100,cash=mx+adj;el.innerHTML=`<div class="k">Maximum offer at ${pc}%</div><div class="big">${money(mx)}</div>${kv('Cash offer after adjustment',money(cash),1)}${kv('Offer vs market',(cash/mv*100).toFixed(1)+'%')}${kv('Trade credit at '+(pc+(CFG.credit||0))+'%',money(rnd(mv*(pc+(CFG.credit||0))/100)+adj))}${CFG.round&&cash>=10?kv('Say this (rounded down to $5)',money(rnd(cash)),1):''}
+<h3 style="margin-top:10px">All tiers</h3>${[60,70,80,85].map(x=>kv(x+'%',money(mv*x/100))).join('')}<div class="row" style="margin-top:10px"><button class="p" data-a="logbuy">Log purchase</button><button data-a="buytoinv">Add to inventory</button><button data-a="addlot">+ Add to lot</button><button data-a="seller" data-v="single">Show seller</button></div>`;return}
+const s=P.sell,pr=num(s.price),cost=n0(s.cost),f=n0(s.fee),fx=n0(s.fix),sh=n0(s.ship),su=n0(s.sup),m=n0(s.margin);
+const den=1-f/100-m/100,tp=den>0?(cost+sh+su+fx)/den:NaN;let h='';
+if(pr>0){const fees=pr*f/100+fx,net=pr-fees-sh-su-cost+cost,pf=net-cost;h+=`<div class="k">Estimated profit</div><div class="big">${sgn(pf)}</div>${kv('Fees',money(fees))}${kv('Shipping + supplies',money(sh+su))}${kv('Net proceeds',money(net),1)}${kv('Margin on sale price',(pf/pr*100).toFixed(1)+'%')}`;h+=`<div class="row" style="margin-top:10px"><button class="p" data-a="logsell" data-v="${pf}|${pr}">Log sale</button></div>`}
+else h+='<p class="mut">Enter an expected sale price for profit.</p>';
+h+=`<h3 style="margin-top:10px">Target price for ${m}% margin</h3><div class="big">${money(tp)}</div>`;el.innerHTML=h}
+
+/* trade */
+V.trade=()=>`<h2>Trade desk</h2><div class="c"><div class="g2">${inp('trade.pg','Value I give at %')}${inp('trade.pt','Value I receive at %')}</div>
+${['give','get'].map(s=>`<h3 style="margin-top:6px">${s=='give'?'I give':'I receive'}</h3><div id="t_${s}"></div><div class="f"><label>Card</label><input id="n_${s}"></div><div class="row" style="align-items:end"><div class="f" style="flex:1;margin:0"><label>Near mint value ($)</label><input id="v_${s}" inputmode="decimal"></div><div class="f" style="width:96px;margin:0;flex:none"><label>Condition</label><select id="c_${s}">${Object.keys(COND).map(c=>`<option>${c}</option>`).join('')}</select></div><button class="p" data-a="titem" data-v="${s}">Add</button></div>
+${s=='give'&&S.inv.length?`<div class="f" style="margin-top:8px"><label>Or pick from inventory</label><select data-ch="tinv"><option value="">Choose a card</option>${S.inv.map(i=>`<option value="${i.id}">${esc(i.name)} ${i.co?esc(i.co+' '+i.grade):''}</option>`).join('')}</select></div>`:''}`).join('')}</div>
+<div class="c" id="out"></div><div class="c"><h3>Verify before you shake</h3>${['Card, set, number, language and variant match','Condition checked in hand','Grade and cert verified on the grader site','No tampering or reholder signs','Both sides agree on the percentages'].map((t,i)=>`<label class="chk"><input type="checkbox" data-a="chk" data-v="${i}" ${P.trade.chk[i]?'checked':''}>${t}</label>`).join('')}</div>`;
+const tsum=s=>P.trade[s].reduce((a,x)=>a+x.v,0);
+function updTrade(){['give','get'].forEach(s=>{const e=$('#t_'+s);if(e)e.innerHTML=P.trade[s].map((x,i)=>`<div class="kv"><span>${esc(x.n)}</span><span>${money(x.v)} <button class="d" data-a="trem" data-v="${s}|${i}" style="min-height:36px;padding:2px 10px">×</button></span></div>`).join('')||'<p class="mut">None yet</p>'});
+const el=$('#out');if(!el)return;const g=tsum('give'),r=tsum('get'),ag=g*n0(P.trade.pg)/100,ar=r*n0(P.trade.pt)/100,bal=ag-ar;
+el.innerHTML=`${kv('I give: market / adjusted',money(g)+' / '+money(ag))}${kv('I receive: market / adjusted',money(r)+' / '+money(ar))}<div class="k" style="margin-top:8px">${bal>0?'They owe me':bal<0?'I owe them':'Even trade'}</div><div class="big">${money(Math.abs(bal))}</div>
+<button class="p" style="width:100%;margin-top:10px" data-a="tdone">Complete trade and update inventory</button>`}
+
+/* data */
+const COLS=['name','set','number','lang','variant','cond','co','grade','cert','qty','cost','date','market','ask','loc','notes'];
+const AL={'card name':'name','quantity':'qty','collector number':'number','language':'lang','condition':'cond','grader':'co','company':'co','location':'loc','market value':'market','cost basis':'cost','asking price':'ask','acquired':'date'};
+const cell=v=>{v=String(v??'');return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const toCSV=()=>[COLS.join(',')].concat(S.inv.map(i=>COLS.map(c=>cell(i[c])).join(','))).join('\n');
+function parseCSV(t){const r=[];let row=[],c='',q=false;for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==','){row.push(c);c=''}else if(h=='\n'||h=='\r'){if(h=='\r'&&t[i+1]=='\n')i++;row.push(c);c='';r.push(row);row=[]}else c+=h}if(c!==''||row.length){row.push(c);r.push(row)}return r.filter(x=>x.some(y=>y.trim()!==''))}
+V.data=()=>`<h2>Data & backup</h2><div class="c"><p>Everything is saved only in this browser on this device. Clearing Safari data or switching browsers loses it, so copy a backup regularly.</p><p class="mut">Last backup: ${META.last?new Date(META.last).toLocaleString():'never'}, ${META.changes} changes since. Storage protection: ${PERSISTED===true?'on':'not confirmed'}. ${navigator.standalone?'Running as a Home Screen app.':'Tip: use Share, then Add to Home Screen, so Safari keeps your data.'}</p><button data-a="dlbackup" style="width:100%;margin-bottom:10px">Save backup file</button>
+<div class="row"><button class="p" data-a="expjson">Show backup (JSON)</button><button data-a="expcsv">Show inventory CSV</button></div>
+<div class="f"><label>Backup, CSV or pasted data</label><textarea id="dt" data-s="data" placeholder="Export text appears here. To import, paste a CSV or backup here, or choose a file.">${esc(P.data)}</textarea></div>
+<div class="row"><button data-a="copy">Copy text</button><button data-a="clr">Clear box</button></div><div class="f"><label>Choose a .csv or .json file</label><input type="file" id="fi" accept=".csv,.json,.txt"></div>
+<div class="row"><button class="p" data-a="imp">Import CSV (adds cards)</button><button class="d" data-a="rest">${P.arm==='rest'?'Tap again to replace all data':'Restore backup (replaces all)'}</button></div></div>
+<div class="c"><h3>Offer settings</h3><div class="f"><label>Trade credit bonus (percentage points above your cash %)</label><input data-cf="credit" inputmode="decimal" value="${esc(CFG.credit)}"></div><label class="chk"><input type="checkbox" data-a="rndtog" ${CFG.round?'checked':''}>Round offers down to the nearest $5 (when $10 or more)</label></div>
+<div class="c"><h3>Condition rates (% of near mint)</h3><p class="mut">Applied when you tap LP, MP, HP or DMG. Defaults are typical starting points. Set what you actually pay at shows.</p><div class="g2">${['LP','MP','HP','DMG'].map(k=>`<div class="f"><label>${k} ${CN[k]}</label><input data-cfg="${k}" inputmode="decimal" value="${Math.round(COND[k]*100)}"></div>`).join('')}</div></div>
+<div class="c"><h3>Reset</h3><button class="d" style="width:100%" data-a="wipe">${P.arm==='wipe'?'Tap again to erase everything':'Erase all data'}</button></div>
+<p class="mut">CSV columns: ${COLS.join(', ')}. Importing adds to current inventory without removing anything.</p>`;
+
+const BAD=/\b(lot|bundle|proxy|custom|digital|reprint|replica|fake|damaged|code card|empty)\b/i;
+async function autocomp(){const el=$('#pz');if(!el||!el.value.trim())return toast('Paste the eBay sold page text first.');const t=el.value,p=P.pr,g=p.type==='graded';
+const tgt=[p.name,p.set,p.num,g?p.co+' '+p.grade:'raw, ungraded'].filter(Boolean).join(' | ');
+$('#aimsg').textContent='Reading sold listings...';let it=null;
+try{const s=await claude.use('sample');if(s){const r=await s.json('Target card: '+tgt+'\nBelow is text copied from an eBay sold-listings page. Extract every SOLD listing as a JSON array of {title, price, date, match, reason}. price = sold item price in USD as a number. date = sold date as YYYY-MM-DD (use year '+new Date().getFullYear()+' if missing) or "". match = true only if the listing is clearly the exact target card (same set, collector number, variant, language) and, if graded, the same company and grade; if raw, it must be ungraded and a single card. Otherwise match=false with a short reason (wrong grade, lot, different variant, custom, damaged, etc). Skip sponsored, active or similar-item listings. Return ONLY the JSON array.\n\n'+t.slice(0,15000));it=Array.isArray(r)?r:r&&r.items}}catch(e){}
+if(!it){it=[];let d='',ti='';t.split('\n').map(x=>x.trim()).filter(Boolean).forEach(l=>{const m=l.match(/Sold\s+([A-Za-z]{3,9}\.?\s+\d{1,2},?\s*\d{4})/i);if(m){const x=new Date(m[1]);d=isNaN(x)?'':x.toISOString().slice(0,10)}else if(/^\$[\d,]+\.\d\d/.test(l)){if(ti){const bad=BAD.test(ti),gm=g?ti.toLowerCase().includes(p.co.toLowerCase())&&new RegExp('\\b'+p.grade+'\\b').test(ti):!/\b(psa|bgs|cgc|graded|slab)\b/i.test(ti);it.push({title:ti,price:l.match(/[\d,]+\.\d\d/)[0],date:d,match:!bad&&gm,reason:bad?'Lot, custom or damaged':'Different grade or graded status'});ti=''}}else if(l.length>25&&!/^(\+|Free|Buy|Best|Sponsored|Opens)/i.test(l))ti=l})}
+const have=new Set(p.comps.map(c=>c.title+'|'+c.price+'|'+c.date));let n=0,x=0;
+(it||[]).forEach(r=>{const pr=num(r.price);if(!(pr>0))return;const d=/^\d{4}-\d\d-\d\d$/.test(r.date||'')?r.date:'',k=(r.title||'')+'|'+pr+'|'+d;if(have.has(k))return;have.add(k);const ex=r.match===false;p.comps.push({price:pr,date:d,link:'',title:String(r.title||'').slice(0,90),ex,reason:ex?String(r.reason||'Not an exact match'):''});n++;if(ex)x++});
+if(!n){$('#aimsg').textContent='No sold listings found in that text. Make sure you copied the Sold items page, or add comps manually below.';return}
+el.value='';render();toast(n+' comps added, '+x+' auto-excluded. Check them against your card.')}
+/* ---------- actions ---------- */
+const TABS=[['search','Search','⌕'],['inv','Cards','▤'],['price','Price','◎'],['vendor','Offer','＄'],['trade','Trade','⇄'],['day','Day','◔'],['data','Data','⛁']];
+function render(){$('#nav').innerHTML=TABS.map(t=>`<button class="${tab==t[0]?'on':''}" data-a="tab" data-v="${t[0]}"><i>${t[2]}</i>${t[1]}</button>`).join('');$('#main').innerHTML=(tab==='data'?'':bkBanner())+V[tab]();
+if(tab==='inv'){$('[data-s="inv.f"]').value=P.inv.f;$('[data-s="inv.s"]').value=P.inv.s;$('[data-s="inv.c"]').value=P.inv.c||'all';updInv()}upd()}
+let tab='search';let FX={},PV=null,qt;
+const upd=()=>({search:updSearch,price:updPrice,vendor:updVendor,trade:updTrade,day:updDay})[tab]?.();
+const go=t=>{tab=t;P.arm='';render();scrollTo(0,0)};
+const A={
+tab:e=>go(e.dataset.v),add:()=>form(),close:()=>{P.arm='';$('#modal').style.display='none'},
+edit:e=>form(S.inv.find(i=>i.id==e.dataset.v)),
+saveitem:e=>{const o={};FL.forEach(([k])=>o[k]=$('#f_'+k).value.trim());if(FX.img)o.img=FX.img;if(FX.cid)o.cid=FX.cid;if(!o.name)return toast('Enter a card name.');if(o.co&&!o.grade)return toast('Enter the grade for a graded card.');
+const id=e.dataset.v;if(id){Object.assign(S.inv.find(i=>i.id==id),o)}else S.inv.push({id:uid(),...o});save();A.close();toast('Saved');tab=='inv'?updInv():render()},
+delitem:e=>{if(P.arm!==e.dataset.v){P.arm=e.dataset.v;return form(S.inv.find(i=>i.id==e.dataset.v))}S.inv=S.inv.filter(i=>i.id!=e.dataset.v);P.arm='';save();A.close();render()},
+ptype:e=>{P.pr.type=e.dataset.v;render()},autocomp:()=>autocomp(),
+addcomp:()=>{const p=num($('#cp').value);if(!(p>0))return toast('Enter the sale price.');P.pr.comps.push({price:p,date:$('#cd').value,link:$('#cl').value.trim()});render()},
+excomp:e=>{const c=P.pr.comps[e.dataset.v];c.ex=!c.ex;upd()},delcomp:e=>{P.pr.comps.splice(e.dataset.v,1);upd()},
+addbin:()=>{const p=num($('#bp').value);if(!(p>0))return toast('Enter the asking price.');P.pr.bin.push({price:p,link:$('#bl').value.trim()});render()},delbin:e=>{P.pr.bin.splice(e.dataset.v,1);upd()},
+saveest:()=>{const r=priceCalc(),p=P.pr;form({name:p.name,set:p.set,number:p.num,co:p.type==='graded'?p.co:'',grade:p.type==='graded'?p.grade:'',cond:p.cond||'NM',market:r.est.toFixed(2),notes:`Est. ${today()} · ${r.conf} confidence · ${r.n} sold comps`});tab='inv'},
+mode:e=>{P.mode=e.dataset.v;render()},pct:e=>{P.buy.pct=e.dataset.v;CFG.pct=+e.dataset.v;saveCfg();render()},
+logbuy:()=>{const mv=num(P.buy.mv),c=mv*n0(P.buy.pct)/100+n0(P.buy.adj);S.tx.push({id:uid(),type:'buy',name:P.buy.name,date:today(),amount:c,note:`Paid ${money(c)} (market ${money(mv)})`});save();toast('Purchase logged')},
+buytoinv:()=>{const mv=num(P.buy.mv),s=P.buy.sel;form({name:P.buy.name,cost:(mv*n0(P.buy.pct)/100+n0(P.buy.adj)).toFixed(2),market:mv,...(s?{set:s.name?s.set:'',number:s.num,img:s.img,cid:PV&&PV.c?PV.c.id:'',variant:PV&&PV.v||'',cond:PV&&PV.cond||'NM'}:{})})},
+logsell:e=>{const[pf,pr]=e.dataset.v.split('|').map(Number);S.tx.push({id:uid(),type:'sell',name:P.sell.name,date:today(),profit:pf,amount:pr,note:`Sold ${money(pr)}, profit ${money(pf)}`});const iv=S.inv.find(x=>x.id==P.sell.invId);if(iv){iv.qty=String(Math.max(0,(n0(iv.qty)||1)-1));if(iv.qty==='0')S.inv=S.inv.filter(x=>x!==iv)}P.sell.invId='';save();toast('Sale logged'+(iv?' and inventory updated':''))},
+titem:e=>{const s=e.dataset.v,v=num($('#v_'+s).value);if(!(v>=0))return toast('Enter a market value.');{const c=$('#c_'+s).value;P.trade[s].push({n:($('#n_'+s).value.trim()||'Card')+(c!=='NM'?' ('+c+')':''),v:v*(COND[c]||1)})}render()},
+trem:e=>{const[s,i]=e.dataset.v.split('|');P.trade[s].splice(i,1);upd()},
+chk:e=>{P.trade.chk[e.dataset.v]=e.checked?1:0},
+tdone:()=>{const T=P.trade;if(!T.give.length&&!T.get.length)return toast('Add cards to the trade first.');
+const bal=tsum('give')*n0(T.pg)/100-tsum('get')*n0(T.pt)/100;
+T.give.filter(x=>x.id).forEach(x=>{const i=S.inv.find(y=>y.id==x.id);if(i){i.qty=String(Math.max(0,(n0(i.qty)||1)-1));if(i.qty==='0')S.inv=S.inv.filter(y=>y.id!=x.id)}});
+S.tx.push({id:uid(),type:'trade',name:'',date:today(),cash:bal,note:`Gave ${T.give.map(x=>x.n).join(', ')||'nothing'}; got ${T.get.map(x=>x.n).join(', ')||'nothing'}; cash ${money(bal)} ${bal>=0?'to me':'from me'}`});
+P.trade={give:[],get:[],pg:T.pg,pt:T.pt,chk:[0,0,0,0,0]};save();toast('Trade saved. Add received cards in Cards.');render()},
+expjson:()=>{P.data=JSON.stringify({app:'CardEdge',v:1,exported:new Date().toISOString(),inv:S.inv,tx:S.tx},null,1);render()},
+expcsv:()=>{P.data=toCSV();render()},clr:()=>{P.data='';render()},
+copy:()=>{const t=$('#dt');if(t.value.startsWith('{"app"')){META.last=Date.now();META.changes=0;saveMeta()}t.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}try{navigator.clipboard.writeText(t.value);ok=true}catch(e){}toast(ok?'Copied':'Text selected. Use Copy from the iPhone menu.')},
+imp:()=>{const r=parseCSV(P.data);if(r.length<2)return toast('Paste a CSV with a header row first.');const h=r[0].map(x=>{x=x.trim().toLowerCase();return AL[x]||x});let n=0;
+r.slice(1).forEach(row=>{const o={};h.forEach((k,i)=>{if(COLS.includes(k))o[k]=(row[i]||'').trim()});if(o.name){o.qty=o.qty||'1';S.inv.push({id:uid(),...o});n++}});save();toast(n+' cards imported');P.data='';render()},
+rest:()=>{if(P.arm!=='rest'){P.arm='rest';return render()}try{const d=JSON.parse(P.data);if(!Array.isArray(d.inv))throw 0;S={inv:d.inv.map(i=>({...i,id:i.id||uid()})),tx:d.tx||[]};save();P.arm='';P.data='';toast('Backup restored');render()}catch(e){P.arm='';toast('That text is not a valid CardEdge backup.');render()}},
+wipe:()=>{if(P.arm!=='wipe'){P.arm='wipe';return render()}S={inv:[],tx:[]};save();P.arm='';render();toast('All data erased')}};
+
+/* ---------- card catalog (TCGdex) ---------- */
+const apiL=l=>'https://api.tcgdex.net/v2/'+(l||'en'),CAT={sets:null,ok:null,rank:{}};
+P.q={name:'',set:'',num:'',res:null,busy:false,err:'',lang:'en',note:''};
+let CFG={pct:70,fx:null,credit:10,round:true,day:{date:'',fee:''}};try{Object.assign(CFG,JSON.parse(localStorage.getItem('cardedge_cfg_v1')||'{}'))}catch(e){}
+const saveCfg=()=>{try{localStorage.setItem('cardedge_cfg_v1',JSON.stringify({pct:CFG.pct,cond:COND,credit:CFG.credit,round:CFG.round,day:CFG.day}))}catch(e){}};P.buy.pct=String(CFG.pct);
+let CART=[];try{CART=JSON.parse(localStorage.getItem('cardedge_cart_v1')||'[]')}catch(e){}if(!Array.isArray(CART))CART=[];
+const saveCart=()=>{try{localStorage.setItem('cardedge_cart_v1',JSON.stringify(CART))}catch(e){}};P.lotpaid='';
+const COND={NM:1,LP:.85,MP:.7,HP:.5,DMG:.35},CN={NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played',DMG:'Damaged'};
+if(CFG.cond)for(const k in CFG.cond)if(k in COND&&k!=='NM'&&CFG.cond[k]>0&&CFG.cond[k]<=1)COND[k]=CFG.cond[k];
+const rnd=x=>CFG.round&&x>=10?Math.floor(x/5)*5:x;
+function offersHTML(est,lo){const p=CFG.pct,cb=CFG.credit||0;return `<div class="k" style="margin-top:8px">Your default buy percentage (tap to change)</div><div class="row">${[60,70,80,85].map(x=>`<button class="chip ${p==x?'on':''}" data-a="setpct" data-v="${x}">${x}%</button>`).join('')}</div>${kv('Max buy at '+p+'% (cash)',money(rnd(est*p/100)),1)}${kv('Trade credit at '+(p+cb)+'%',money(rnd(est*(p+cb)/100)),1)}${kv('Safe max cash (low end of range)',money(rnd(lo*p/100)))}${[60,70,80,85].map(x=>kv('Cash at '+x+'%',money(rnd(est*x/100)))).join('')}${CFG.round?'<p class="mut">Offers of $10 or more are rounded down to the nearest $5.</p>':''}`}
+function autoEst(){const d=PV&&PV.d,pr=d&&d.pricing||{},tp=pr.tcgplayer,cm=pr.cardmarket;if(!tp||!PV.v||!tp[PV.v]||tp[PV.v].marketPrice==null)return null;
+const m=tp[PV.v].marketPrice,k=COND[PV.cond]||1;let cu=null;if(cm&&CFG.fx&&(cm.unit||'EUR')==='EUR'){const t=(PV.v!=='normal'&&cm['trend-holo']!=null)?cm['trend-holo']:cm.trend;if(t!=null)cu=t*CFG.fx}
+let conf='Low',w=.25,why='TCGplayer listing guide only, no sold comps';
+if(cu){const r=Math.max(m,cu)/Math.min(m,cu);if(r<=1.15){conf='Medium';w=.15;why='TCGplayer and Cardmarket agree within 15%'}else why='TCGplayer and Cardmarket differ by '+Math.round((r-1)*100)+'%'}
+const lo=Math.min(m*(1-w),cu==null?m*(1-w):cu)*k,hi=Math.max(m*(1+w),cu==null?m*(1+w):cu)*k;return{est:m*k,lo,hi,conf,why,tcg:m,cm:cu,k}}
+jf('https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD').then(r=>{if(r&&r.rates&&r.rates.USD>0){CFG.fx=r.rates.USD;if(PV)refresh()}}).catch(()=>{});
+const CK='cardedge_cache_v1';let CACHE={};try{CACHE=JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){}
+function cput(k,v){CACHE[k]={t:Date.now(),v};Object.keys(CACHE).sort((a,b)=>CACHE[b].t-CACHE[a].t).slice(40).forEach(x=>delete CACHE[x]);try{localStorage.setItem(CK,JSON.stringify(CACHE))}catch(e){CACHE={};try{localStorage.removeItem(CK)}catch(_){}}}
+async function jfc(u){try{const v=await jf(u);cput(u,v);return[v,null]}catch(e){const c=CACHE[u];if(c)return[c.v,c.t];throw e}}
+let LS={recent:[],fav:[],want:[]};try{Object.assign(LS,JSON.parse(localStorage.getItem('cardedge_lists_v1')||'{}'))}catch(e){}
+const saveLists=()=>{try{localStorage.setItem('cardedge_lists_v1',JSON.stringify(LS))}catch(e){}};
+const slim=c=>({id:c.id,local:c.local,name:c.name,image:c.image,lang:c.lang||'en',set:{id:c.set.id,name:c.set.name,official:c.set.official}});
+const pushRecent=c=>{LS.recent=[slim(c),...LS.recent.filter(x=>!(x.id===c.id&&x.lang===(c.lang||'en')))].slice(0,12);saveLists()};
+async function jf(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
+async function loadSets(){const l=P.q.lang||'en';try{const[a]=await jfc(apiL(l)+'/sets');if(l!==(P.q.lang||'en'))return;CAT.sets=new Map();CAT.rank={};a.forEach((s,i)=>{CAT.sets.set(s.id,{id:s.id,name:s.name,official:s.cardCount&&s.cardCount.official,total:s.cardCount&&s.cardCount.total});CAT.rank[s.id]=i});CAT.ok=true;$('#setlist').innerHTML=[...new Set(a.map(s=>s.name))].reverse().map(n=>`<option value="${esc(n)}"></option>`).join('')}catch(e){CAT.ok=false}if(tab==='search'||tab==='vendor')updSearch()}
+const setOf=id=>{const k=id.slice(0,id.lastIndexOf('-'));return(CAT.sets&&CAT.sets.get(k))||{id:k,name:k}};
+const langChips=()=>`<div class="row">${[['en','English'],['ja','Japanese']].map(([k,l])=>`<button class="chip ${(P.q.lang||'en')===k?'on':''}" data-a="qlang" data-v="${k}">${l}</button>`).join('')}</div>`;
+const lookupHTML=()=>`${langChips()}${inp('q.name','Find a card',{t:'text',ph:'umbreon ex, charizard...'})}<div class="g2">${inp('q.set','Set (optional)',{t:'text',list:1,ph:'start typing'})}${inp('q.num','Number (optional)',{t:'text',ph:'161'})}</div><p class="mut" id="cstat"></p><div id="sres"></div><div id="bsel"></div>`;
+V.search=()=>`<h2>Find a card</h2><div class="c">${langChips()}${inp('q.name','Card name',{t:'text',ph:'umbreon ex, charizard...'})}<div class="g2">${inp('q.set','Set (optional)',{t:'text',list:1,ph:'start typing'})}${inp('q.num','Number (optional)',{t:'text',ph:'161 or 161/131'})}</div><p class="mut" id="cstat"></p><button class="p" style="width:100%" data-a="dosearch">Search</button></div><div id="sres"></div>`;
+function updSearch(){const st=$('#cstat');if(st)st.innerHTML=CAT.ok===null?'Loading card catalog...':CAT.ok?'Live catalog ready: '+CAT.sets.size+' sets ('+(P.q.lang==='ja'?'Japanese':'English')+'). Names, numbers and images from TCGdex.':'<span class="neg">Live catalog not reachable here.</span> Preview viewers block outside requests. Use the hosted copy of CardEdge, or add cards by hand.';
+const el=$('#sres');if(!el)return;const q=P.q;
+if(q.busy){el.innerHTML='<div class="c">'+[0,1,2,3].map(()=>'<div class="sr" style="padding:8px 0"><div class="thumb sk"></div><div style="flex:1"><div class="sk" style="height:14px;width:60%;margin-bottom:8px"></div><div class="sk" style="height:12px;width:40%"></div></div></div>').join('')+'</div>';return}
+if(q.err){el.innerHTML=`<div class="c neg">${esc(q.err)}</div>`;return}
+if(!q.res){el.innerHTML=(tab==='search'?'<p class="mut">Type a card name. Add a set or number to narrow it down, or pick only a set to browse it.</p>':'')+listsHTML();return}
+el.innerHTML=`<div class="c"><div class="k">${q.res.length} found${q.res.length>(tab==='vendor'?10:60)?', showing the first '+(tab==='vendor'?10:60)+' from the newest sets. Add a set or number to narrow it':''}. Tap the right card.${q.note?`<br><span class="warn">${esc(q.note)}</span>`:''}</div>`+(q.res.slice(0,tab==='vendor'?10:60).map((c,i)=>`<div class="item sr" data-a="pick" data-v="${i}">${c.image?`<img class="thumb" loading="lazy" alt="" src="${esc(c.image)}/low.webp">`:'<div class="thumb"></div>'}<div><b>${esc(c.name)}</b><br><span class="mut">${esc(c.set.name)} · ${esc(c.local)}${c.set.official?'/'+c.set.official:''}</span></div></div>`).join('')||'<p class="mut">No matches. Try fewer words or another spelling.</p>')+'</div>'}
+async function doSearch(){const q=P.q,l=q.lang||'en',name=q.name.trim(),sn=q.set.trim().toLowerCase(),no=q.num.trim().split('/')[0].replace(/^0+(?=\d)/,'').toLowerCase();
+if(!name&&!sn){q.res=null;q.err='';q.note='';return updSearch()}
+if(CAT.ok===false&&!CAT.sets&&!name){q.err=navigator.onLine?'Live catalog not reachable here. Use the hosted copy.':'You are offline. Recents and favorites still open.';return updSearch()}
+const my=doSearch.n=(doSearch.n||0)+1;q.busy=true;q.err='';q.note='';updSearch();
+try{const all=CAT.sets?[...CAT.sets.values()]:[],ex=all.filter(s=>s.name.toLowerCase()===sn),sm=sn?(ex.length?ex:all.filter(s=>s.name.toLowerCase().includes(sn))):[];
+if(sn&&CAT.sets&&!sm.length)throw new Error('No set matches "'+q.set+'". Pick one from the suggestions.');
+let L=[],at=null;if(name){const[r,a]=await jfc(apiL(l)+'/cards?name='+encodeURIComponent(name));L=r;at=a}else if(sm.length){for(const s of sm.slice(0,3)){const[d,a]=await jfc(apiL(l)+'/sets/'+encodeURIComponent(s.id));L=L.concat(d.cards||[]);at=at||a}}
+if(sm.length&&name){const k=new Set(sm.map(s=>s.id));L=L.filter(c=>k.has(setOf(c.id).id))}
+if(no)L=L.filter(c=>String(c.localId).toLowerCase().replace(/^0+(?=\d)/,'')===no);
+if(my!==doSearch.n)return;
+q.note=at?'Offline: showing results saved '+new Date(at).toLocaleString():'';
+q.res=L.map(c=>({id:c.id,local:c.localId,name:c.name,image:c.image,lang:l,set:setOf(c.id)})).sort((a,b)=>(CAT.rank[b.set.id]??-1)-(CAT.rank[a.set.id]??-1));q.busy=false}
+catch(e){if(my!==doSearch.n)return;q.busy=false;q.err=e.message.startsWith('No set')?e.message:(navigator.onLine?'Search failed. Check your connection and try again.':'You are offline and this search was not saved. Recents and favorites still open.')}
+updSearch()}
+
+function pdBody(no){const d=PV.d,pr=d&&d.pricing||{},tp=pr.tcgplayer,vs=tp?Object.entries(tp).filter(([k,v])=>v&&typeof v==='object'&&(v.marketPrice!=null||v.lowPrice!=null)):[];
+let h=d&&d.rarity?`<span class="tag">${esc(d.rarity)}</span>`:'';
+if(!vs.length)return h+'<p class="mut">No TCGplayer price for this card, so no automatic estimate. Enter a value by hand.</p>';
+if(!vs.find(x=>x[0]===PV.v))PV.v=vs[0][0];
+if(vs.length>1)h+=`<div class="k" style="margin-top:8px">Variant</div><div class="row">${vs.map(x=>`<button class="chip ${x[0]===PV.v?'on':''}" data-a="pv" data-v="${esc(x[0])}">${esc(x[0])}</button>`).join('')}</div>`;
+h+=`<div class="k">Condition</div><div class="row">${Object.keys(COND).map(c=>`<button class="chip ${c===PV.cond?'on':''}" data-a="pcond" data-v="${c}">${c}</button>`).join('')}</div><p class="mut">${CN[PV.cond]}: ${Math.round(COND[PV.cond]*100)}% of near mint.</p>`;
+const a=autoEst(),cc=a.conf==='Medium'?'warn':'neg';
+h+=`<div class="k">Estimated value (${PV.cond})</div><div class="big">${money(a.est)}</div><span class="conf ${cc}">${a.conf} confidence</span><p>Likely range ${money(a.lo)} to ${money(a.hi)}</p>
+<p class="mut">${esc(a.why)}. TCGplayer market ${money(a.tcg)} (near mint)${a.cm!=null?', Cardmarket trend about '+money(a.cm):''}, updated ${esc(String(tp.updated||'unknown').slice(0,10))}. Condition rates are editable in the Data tab. Not a sold-comp price.</p>${staleHTML(tp)}`+wantBanner(a)+listBtns()+(no?'':offersHTML(a.est,a.lo));return h}
+function pdRender(){const el=$('#pd');if(el&&PV)el.innerHTML=pdBody(false)}
+const daysOld=t=>{const d=new Date(t);return isNaN(d)?null:Math.floor((Date.now()-d)/864e5)};
+function staleHTML(tp){let s='';if(PV&&PV.age)s+=`<p class="warn"><b>Offline:</b> saved lookup from ${new Date(PV.age).toLocaleString()}. Prices may have changed.</p>`;const dd=tp&&daysOld(tp.updated);if(dd!=null&&dd>3)s+=`<p class="warn">This TCGplayer price is ${dd} days old.</p>`;return s}
+const wantOf=id=>LS.want.find(x=>x.id===id);
+function wantBanner(a){const w=PV&&PV.c&&wantOf(PV.c.id);if(!w)return'';const t=num(w.target);return t>0&&a.est<=t?`<p class="pos"><b>Under your want-list target</b> of ${money(t)}. Estimate ${money(a.est)}.</p>`:`<p class="mut">On your want list${t>0?', target '+money(t):''}.</p>`}
+function listBtns(){const c=PV&&PV.c;if(!c)return'';const f=LS.fav.some(x=>x.id===c.id&&x.lang===(c.lang||'en')),w=wantOf(c.id);return `<div class="row"><button data-a="favtog">${f?'★ Favorited':'☆ Favorite'}</button><button data-a="wanttog">${w?'✓ On want list':'+ Want list'}</button></div>`}
+const skel='<div class="sk" style="height:26px;width:50%;margin:6px 0"></div><div class="sk" style="height:14px;width:80%;margin:6px 0"></div><div class="sk" style="height:14px;width:65%"></div>';
+async function loadDetail(c,done,fail){try{const[d,at]=await jfc(apiL(c.lang)+'/cards/'+encodeURIComponent(c.id));if(!PV||PV.c!==c)return;PV.d=d;PV.age=at;done()}catch(e){fail()}}
+async function openPrev(c){pushRecent(c);PV={c,num:c.local+(c.set.official?'/'+c.set.official:''),v:null,d:null,cond:'NM',age:null};
+$('#modal').innerHTML=`<div class="c"><img class="big-img" alt="${esc(c.name)}" src="${c.image?esc(c.image)+'/high.webp':''}"><h2>${esc(c.name)}</h2><p>${esc(c.set.name)} · ${esc(PV.num)}<br><span class="mut">Check this matches the card in your hand: set, number, art and variant.</span></p><div id="pd">${skel}</div><div class="row"><button class="p" data-a="usecard">Price this card</button><button data-a="cardinv">Add to inventory</button></div><button style="width:100%" data-a="close">Close</button></div>`;$('#modal').style.display='block';$('#modal').scrollTop=0;
+loadDetail(c,pdRender,()=>{const el=$('#pd');if(el)el.textContent='Prices could not be loaded right now. You can still price the card manually.'})}
+const refresh=()=>{if(tab==='vendor')applyBuy();else pdRender()};
+const redraw=()=>{if($('#pd'))pdRender();updBsel()};
+function updBsel(){const el=$('#bsel'),s=P.buy.sel;if(!el)return;el.innerHTML=s?`<div class="sr" style="margin:8px 0">${s.img?`<img class="thumb" alt="" src="${esc(s.img)}">`:''}<div><b>${esc(s.name)}</b><br><span class="mut">${esc(s.set)} · ${esc(s.num)}</span></div></div>`+(PV&&PV.d?pdBody(true)+(P.mode==='buy'?'<button class="p" style="width:100%;margin-top:8px" data-a="addlot">+ Add to lot</button>':''):skel):''}
+function applyBuy(){updBsel();const a=autoEst();if(a){if(P.mode==='sell'){P.sell.price=a.est.toFixed(2);const i=$('[data-s="sell.price"]');if(i)i.value=P.sell.price}else{P.buy.mv=a.est.toFixed(2);const i=$('[data-s="buy.mv"]');if(i)i.value=P.buy.mv}}updVendor()}
+function buyPickC(c){pushRecent(c);PV={c,num:c.local+(c.set.official?'/'+c.set.official:''),v:null,d:null,cond:'NM',age:null};P.buy.sel={name:c.name,set:c.set.name,num:PV.num,img:c.image?c.image+'/low.webp':''};P.buy.name=c.name;if(P.mode==='sell')P.sell.name=c.name;P.q.res=null;updBsel();updSearch();
+loadDetail(c,applyBuy,()=>{const el=$('#bsel');if(el)el.insertAdjacentHTML('beforeend','<p class="neg">Price could not be loaded. Open Manual value below and enter it.</p>')})}
+const buyPick=i=>buyPickC(P.q.res[i]);
+function listsHTML(){const inner=c=>`${c.image?`<img class="thumb" style="width:36px;height:50px" loading="lazy" alt="" src="${esc(c.image)}/low.webp">`:'<div class="thumb"></div>'}<div><b>${esc(c.name)}</b>${c.lang==='ja'?' <span class="tag">JA</span>':''}<br><span class="mut">${esc(c.set.name)} · ${esc(c.local)}${c.set.official?'/'+c.set.official:''}</span></div>`,row=(c,k,i)=>`<div class="item sr" data-a="pickobj" data-v="${k}|${i}">${inner(c)}</div>`;let h='';
+if(LS.fav.length)h+=`<div class="c"><h3>Favorites</h3>${LS.fav.map((c,i)=>row(c,'fav',i)).join('')}</div>`;
+if(LS.recent.length)h+=`<div class="c"><h3>Recent</h3>${LS.recent.slice(0,6).map((c,i)=>row(c,'recent',i)).join('')}</div>`;
+if(tab==='search'&&LS.want.length)h+=`<div class="c"><h3>Want list</h3>${LS.want.map((c,i)=>`<div style="border-top:1.5px solid var(--line);padding:8px 0"><div class="sr" data-a="pickobj" data-v="want|${i}" style="cursor:pointer">${inner(c)}</div><div class="row" style="margin:6px 0 0;align-items:end"><div class="f" style="margin:0;flex:1"><label>Buy under ($)</label><input data-want="${i}" inputmode="decimal" value="${esc(c.target||'')}"></div><button class="d" data-a="wantdel" data-v="${i}">Remove</button></div></div>`).join('')}</div>`;
+return h}
+const pvPrice=()=>{const tp=PV.d&&PV.d.pricing&&PV.d.pricing.tcgplayer,x=tp&&PV.v&&tp[PV.v];return{tp,m:x&&x.marketPrice!=null?x.marketPrice:null}};
+Object.assign(A,{dosearch:()=>{clearTimeout(qt);doSearch();document.activeElement&&document.activeElement.blur()},pick:e=>tab==='vendor'?buyPick(e.dataset.v):openPrev(P.q.res[e.dataset.v]),pickobj:e=>{const[k,i]=e.dataset.v.split('|'),c=LS[k][i];if(c)tab==='vendor'?buyPickC(c):openPrev(c)},undo:()=>{const u=UNDO;UNDO=null;$('#toast').style.display='none';u&&u()},pv:e=>{PV.v=e.dataset.v;refresh()},
+usecard:()=>{const{c,num,v}=PV,a=autoEst(),tp=PV.d&&PV.d.pricing&&PV.d.pricing.tcgplayer;Object.assign(P.pr,{type:'raw',name:c.name,set:c.set.name,num,img:c.image?c.image+'/low.webp':'',cond:PV.cond,tcg:a?String(a.tcg):'',tsrc:a?'TCGplayer '+v+' market $'+a.tcg+', updated '+String(tp.updated||'').slice(0,10)+' (via TCGdex). A listing guide, not a sold comp.':'',comps:[],bin:[],pc:'',guide:''});if(a){P.buy.name=c.name;P.buy.mv=a.est.toFixed(2)}A.close();go('price')},
+cardinv:()=>{const{c,num,v,cond}=PV,a=autoEst();form({name:c.name,set:c.set.name,number:num,lang:c.lang==='ja'?'Japanese':'English',variant:v||'',cond,market:a?a.est.toFixed(2):'',img:c.image?c.image+'/low.webp':'',cid:c.id})},
+pcond:e=>{PV.cond=e.dataset.v;refresh()},
+setpct:e=>{CFG.pct=+e.dataset.v;saveCfg();P.buy.pct=String(CFG.pct);if($('#pd'))pdRender();if(tab==='price')updPrice();if(tab==='vendor')render()},
+tooffer:e=>{P.buy.mv=Number(e.dataset.v).toFixed(2);P.buy.name=P.pr.name;P.mode='buy';go('vendor')}});
+const lotSum=()=>({n:CART.reduce((a,x)=>a+x.qty,0),tot:CART.reduce((a,x)=>a+x.val*x.qty,0),lo:CART.reduce((a,x)=>a+x.lo*x.qty,0)});
+function updLot(){const el=$('#lot');if(!el)return;if(P.mode!=='buy'||!CART.length){el.innerHTML='';return}const s=lotSum();
+el.innerHTML=`<div class="c"><h3>Lot: ${s.n} card${s.n==1?'':'s'}</h3><p class="mut" style="margin-top:-4px">Swipe a card left to remove it.</p>${CART.map((x,i)=>`<div class="sr lotrow" data-i="${i}" style="padding:6px 0;border-top:1.5px solid var(--line);touch-action:pan-y">${x.img?`<img class="thumb" style="width:36px;height:50px" alt="" src="${esc(x.img)}">`:''}<div style="flex:1;min-width:0"><b>${esc(x.name)}</b><br><span class="mut">${esc([x.set,x.num,x.v,x.cond].filter(Boolean).join(' · '))}</span><br>${money(x.val)} each${x.cond?`<div class="row" style="margin:4px 0 0;gap:4px">${Object.keys(COND).map(c=>`<button class="chip ${x.cond===c?'on':''}" data-a="lotcond" data-v="${i}|${c}" style="min-height:36px;min-width:44px;padding:2px 6px;font-size:13px">${c}</button>`).join('')}</div>`:''}</div><div class="row" style="margin:0;flex:none;flex-wrap:nowrap"><button data-a="lotq" data-v="${i}|-1" style="min-width:42px;padding:0" aria-label="Fewer">−</button><b style="align-self:center;min-width:22px;text-align:center">${x.qty}</b><button data-a="lotq" data-v="${i}|1" style="min-width:42px;padding:0" aria-label="More">+</button></div></div>`).join('')}
+<div class="k" style="margin-top:8px">Total lot value</div><div class="big">${money(s.tot)}</div>${offersHTML(s.tot,s.lo)}
+<div class="f" style="margin-top:8px"><label>Final price you agree on (optional, $)</label><input data-s="lotpaid" inputmode="decimal" value="${esc(P.lotpaid)}"></div><p class="mut" id="lotnote"></p>
+<div class="row"><button data-a="seller" data-v="lot">Show seller</button><button data-a="lotshare">Share offer</button></div><div class="row"><button class="p" data-a="lotbuy">Bought it: log and add to inventory</button><button class="d" data-a="lotclear">Clear lot</button></div></div>`;updLotNote()}
+function updLotNote(){const el=$('#lotnote');if(!el)return;const s=lotSum(),paid=num(P.lotpaid),pc=CFG.pct;el.textContent=paid>0?'Paid '+money(paid)+' is '+(paid/s.tot*100).toFixed(1)+'% of lot value. Cost is split across cards by value.':'Cost is split by value at '+pc+'% ('+money(s.tot*pc/100)+') unless you enter a final price.'}
+Object.assign(A,{
+qlang:e=>{P.q.lang=e.dataset.v;CAT.sets=null;CAT.ok=null;CAT.rank={};P.q.res=null;P.q.note='';loadSets();render()},
+favtog:()=>{const c=PV.c,i=LS.fav.findIndex(x=>x.id===c.id&&x.lang===(c.lang||'en'));if(i>=0)LS.fav.splice(i,1);else LS.fav.unshift(slim(c));LS.fav=LS.fav.slice(0,30);saveLists();redraw()},
+wanttog:()=>{const c=PV.c,i=LS.want.findIndex(x=>x.id===c.id);if(i>=0)LS.want.splice(i,1);else{const a=autoEst();LS.want.unshift({...slim(c),target:a?String(rnd(a.est*CFG.pct/100).toFixed(2)):''})}saveLists();redraw()},
+wantdel:e=>{LS.want.splice(+e.dataset.v,1);saveLists();updSearch()},
+rndtog:e=>{CFG.round=e.checked;saveCfg()},
+lotdel:e=>{CART.splice(+e.dataset.v,1);saveCart();updLot()},
+txdel:e=>{S.tx=S.tx.filter(t=>t.id!==e.dataset.v);save();updDay()},
+lotshare:()=>{const s=lotSum(),pc=CFG.pct,cb=CFG.credit||0,paid=num(P.lotpaid),cash=paid>0?paid:rnd(s.tot*pc/100),cr=rnd(s.tot*(pc+cb)/100);
+const t='315TCG offer\n'+CART.map(x=>'• '+x.name+(x.num?' '+x.num:'')+(x.cond?' ('+x.cond+')':'')+(x.qty>1?' x'+x.qty:'')).join('\n')+'\n\nCash: '+money(cash)+(paid>0?'':'\nTrade credit: '+money(cr))+'\n'+new Date().toLocaleDateString();
+if(navigator.share)navigator.share({text:t}).catch(()=>{});else{copyText(t);toast('Offer text copied')}},
+seller:e=>{const pc=CFG.pct,cb=CFG.credit||0;let title,cash,cr=null,list='';
+if(e.dataset.v==='lot'){const s=lotSum(),paid=num(P.lotpaid);title=s.n+' card'+(s.n==1?'':'s');cash=paid>0?paid:rnd(s.tot*pc/100);if(!(paid>0))cr=rnd(s.tot*(pc+cb)/100);list=CART.map(x=>esc(x.name)+(x.cond?' ('+x.cond+')':'')+(x.qty>1?' ×'+x.qty:'')).join('<br>')}
+else{const mv=num(P.buy.mv),adj=n0(P.buy.adj);title=P.buy.name||'Your card';cash=rnd(mv*pc/100+adj);cr=rnd(mv*(pc+cb)/100+adj)}
+const el=$('#seller');el.innerHTML=`<div style="opacity:.8;font-size:20px">${esc(title)}</div><div style="margin-top:30px;font-size:22px">Our offer</div><div style="font-size:min(24vw,110px);font-weight:900;color:#d4af37;line-height:1.1">${money(cash)}</div><div style="font-size:22px">cash</div>${cr!=null?`<div style="margin-top:28px;font-size:30px;font-weight:800">${money(cr)}</div><div style="font-size:20px">in trade credit</div>`:''}<div style="margin-top:28px;opacity:.85;font-size:18px;line-height:1.5">${list}</div><div style="margin-top:36px;opacity:.6">Tap anywhere to close</div>`;el.style.display='block'},
+sellclose:()=>{$('#seller').style.display='none'},
+bkquick:()=>{P.data=JSON.stringify({app:'CardEdge',v:1,exported:new Date().toISOString(),inv:S.inv,tx:S.tx},null,1);A.dlbackup();go('data')},
+dlbackup:()=>{const j=P.data&&P.data.startsWith('{"app"')?P.data:JSON.stringify({app:'CardEdge',v:1,exported:new Date().toISOString(),inv:S.inv,tx:S.tx},null,1);copyText(j);try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([j],{type:'application/json'}));a.download='cardedge-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove()}catch(e){}META.last=Date.now();META.changes=0;saveMeta();toast('Backup copied and saved')},
+prcond:e=>{P.pr.cond=e.dataset.v;render()},
+lotcond:e=>{const[i,c]=e.dataset.v.split('|'),x=CART[i],ok=COND[x.cond]||1,nk=COND[c];if(x.base==null)x.base=x.val/ok;x.val=x.base*nk;x.lo=x.lo*nk/ok;x.cond=c;saveCart();updLot()},
+addlot:()=>{const s=P.buy.sel,a=s&&PV&&PV.d?autoEst():null,mv=num(P.buy.mv);if(!(mv>0)&&!a)return toast('Pick a card or enter a value first.');
+const val=mv>0?mv:a.est,lo=a?val*(a.lo/a.est):val*.75,it={name:s?s.name:(P.buy.name||'Card'),set:s?s.set:'',num:s?s.num:'',img:s?s.img:'',v:a?PV.v:'',cond:a?PV.cond:'',val,lo,base:a?val/(COND[PV.cond]||1):val,qty:1,cid:a&&PV.c?PV.c.id:''};
+const m=CART.find(x=>x.cid&&x.cid===it.cid&&x.v===it.v&&x.cond===it.cond&&Math.abs(x.val-it.val)<.005);if(m)m.qty++;else CART.push(it);saveCart();
+P.buy.sel=null;P.buy.mv='';P.buy.name='';PV=null;Object.assign(P.q,{name:'',set:'',num:'',res:null,err:''});render();toast('Added to lot');const f=$('[data-s="q.name"]');if(f)f.focus()},
+lotq:e=>{const[i,d]=e.dataset.v.split('|');CART[i].qty+=+d;if(CART[i].qty<1)CART.splice(i,1);saveCart();updLot()},
+lotclear:()=>{CART=[];P.lotpaid='';saveCart();updLot()},
+lotbuy:()=>{const s=lotSum();if(!s.n)return;const paid=num(P.lotpaid)>0?num(P.lotpaid):s.tot*CFG.pct/100,f=paid/s.tot;
+CART.forEach(x=>S.inv.push({id:uid(),name:x.name,set:x.set,number:x.num,lang:'English',variant:x.v,cond:x.cond||'NM',co:'',grade:'',cert:'',qty:String(x.qty),cost:(x.val*f).toFixed(2),date:today(),market:x.val.toFixed(2),ask:'',loc:'',notes:'From lot purchase',img:x.img,cid:x.cid}));
+S.tx.push({id:uid(),type:'buy',name:'Lot of '+s.n+' cards',date:today(),amount:paid,note:'Paid '+money(paid)+' for lot valued '+money(s.tot)+': '+CART.map(x=>x.name+(x.qty>1?' x'+x.qty:'')).join(', ').slice(0,200)});
+save();CART=[];P.lotpaid='';saveCart();render();toast('Lot logged and added to inventory')}});
+function undoable(n,msg){const f=A[n];A[n]=e=>{const snap=JSON.stringify({S,CART,LS});f(e);if(JSON.stringify({S,CART,LS})!==snap)toast(msg,()=>{const o=JSON.parse(snap);S=o.S;CART=o.CART;LS=o.LS;save();saveCart();saveLists();render()})}}
+[['tdone','Trade saved'],['lotbuy','Lot bought and added to inventory'],['wipe','All data erased'],['rest','Backup restored'],['imp','Cards imported'],['lotclear','Lot cleared'],['delitem','Card deleted'],['logsell','Sale logged'],['lotdel','Removed from lot'],['lotq','Lot updated'],['txdel','Entry removed']].forEach(x=>undoable(...x));
+let TS=null;document.addEventListener('touchstart',e=>{const r=e.target.closest('.lotrow');TS=r?{r,x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
+document.addEventListener('touchmove',e=>{if(!TS)return;const dx=e.touches[0].clientX-TS.x,dy=e.touches[0].clientY-TS.y;if(Math.abs(dx)>Math.abs(dy)&&dx<0)TS.r.style.transform='translateX('+Math.max(dx,-120)+'px)'},{passive:true});
+document.addEventListener('touchend',e=>{if(!TS)return;const dx=e.changedTouches[0].clientX-TS.x,r=TS.r;TS=null;if(dx<-90)A.lotdel({dataset:{v:r.dataset.i}});else r.style.transform=''},{passive:true});
+function bkBanner(){if(META.changes<10)return'';return `<div class="c bk"><b>Back up your data</b><br><span class="mut">${META.changes} changes since your last backup${META.last?' ('+new Date(META.last).toLocaleDateString()+')':' (never backed up)'}.</span><div class="row" style="margin:8px 0 0"><button class="p" data-a="bkquick">Back up now</button></div></div>`}
+V.day=()=>{if(CFG.day.date!==today())CFG.day={date:today(),fee:''};return `<h2>Show day</h2><div class="c"><div class="f"><label>Table fee and expenses today ($)</label><input data-cf="fee" inputmode="decimal" value="${esc(CFG.day.fee)}"></div><div id="daysum"></div></div><div class="c"><h3>Today's activity</h3><div id="daylist"></div></div>`};
+function updDay(){const el=$('#daysum');if(!el)return;const T=S.tx.filter(t=>t.date===today()),cnt=ty=>T.filter(t=>t.type===ty).length,sum=(ty,f)=>T.filter(t=>t.type===ty).reduce((a,t)=>a+n0(t[f]),0),sp=sum('buy','amount'),rev=sum('sell','amount'),pf=sum('sell','profit'),tc=sum('trade','cash'),fee=n0(CFG.day.fee);
+el.innerHTML=kv('Bought ('+cnt('buy')+')',money(sp))+kv('Sold ('+cnt('sell')+')',money(rev))+kv('Trades ('+cnt('trade')+'), cash in or out',sgn(tc))+kv('Profit on sales',sgn(pf))+kv('Expenses',money(fee))+kv('Cash flow today',sgn(rev-sp+tc-fee),1)+kv('Sales profit after expenses',sgn(pf-fee),1);
+$('#daylist').innerHTML=T.length?T.slice().reverse().map(t=>`<div class="item" style="cursor:default"><button class="d" data-a="txdel" data-v="${t.id}" style="min-height:36px;float:right;padding:2px 12px" aria-label="Remove entry">×</button><b>${t.type==='trade'?'Trade':t.type==='buy'?'Bought':'Sold'}</b> ${esc(t.name||'')}<br><span class="mut">${esc(t.note||'')}</span></div>`).join(''):'<p class="mut">Nothing logged yet today. Log buys and sales from the Offer tab and trades from the Trade tab.</p>'}
+const netUpd=()=>{const n=$('#net');if(n)n.textContent=navigator.onLine?'315TCG':'315TCG · OFFLINE'};addEventListener('online',netUpd);addEventListener('offline',netUpd);netUpd();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().then(r=>{PERSISTED=r})}catch(e){}
+try{if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&String(e.target.dataset.s).startsWith('q.')){e.preventDefault();A.dosearch()}});
+loadSets();
+document.addEventListener('paste',e=>{if(e.target.id==='pz')setTimeout(autocomp,80)});
+const CH={prof:e=>{const f=FEES[e.value];P.sell.prof=e.value;if(f[1]!==null){P.sell.fee=String(f[1]);P.sell.fix=String(f[2])}render()},
+sellinv:e=>{const i=S.inv.find(x=>x.id==e.value);if(!i)return;P.sell.invId=i.id;P.sell.name=i.name+(i.co?' '+i.co+' '+i.grade:'');P.sell.price=String(num(i.ask)>0?num(i.ask):n0(i.market)||'');P.sell.cost=String(n0(i.cost));render()},
+tinv:e=>{const i=S.inv.find(x=>x.id==e.value);if(i){P.trade.give.push({n:i.name+(i.co?' '+i.co+' '+i.grade:''),v:n0(i.market),id:i.id});render()}}};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||el.type==='checkbox'&&0)return;if(el.tagName==='INPUT'&&el.type!=='checkbox')return;A[el.dataset.a]?.(el)});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.want){const w=LS.want[+t.dataset.want];if(w){w.target=t.value;saveLists()}return}if(t.dataset.cf){if(t.dataset.cf==='fee'){CFG.day.fee=t.value;saveCfg();updDay();return}const x=parseFloat(t.value);CFG[t.dataset.cf]=isFinite(x)?x:0;saveCfg();return}if(t.dataset.cfg){const x=parseFloat(t.value);if(x>0&&x<=100){COND[t.dataset.cfg]=x/100;saveCfg()}return}if(t.dataset.s){const v=t.value;sp(t.dataset.s,v);if(t.dataset.s.startsWith('pr.comps')||t.dataset.s==='data')return;if(t.dataset.s==='lotpaid'){updLotNote();return}if(t.dataset.s.startsWith('q.')){clearTimeout(qt);qt=setTimeout(doSearch,450);return}if(t.dataset.live)updInv();else if(t.dataset.s.startsWith('pr.')&&['pr.type'].includes(t.dataset.s)===false)updPrice();else upd()}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.ch)CH[t.dataset.ch](t);else if(t.dataset.s&&t.tagName==='SELECT'){sp(t.dataset.s,t.value);t.dataset.live?updInv():(tab=='price'&&render())}
+if(t.id==='fi'&&t.files[0]){const r=new FileReader();r.onload=()=>{P.data=String(r.result);render();toast('File loaded. Choose Import or Restore.')};r.readAsText(t.files[0])}});
+render();
+</script></body></html>
